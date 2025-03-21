@@ -6,7 +6,36 @@ Esta aplicación divide archivos E57 de gran tamaño en archivos más pequeños,
 
 - CMake (3.10 o superior)
 - Compilador compatible con C++17
-- libE57Format (v3.2.0, incluido como submódulo)
+- libE57Format (v3.2.0)
+
+## Instalación de Dependencias
+
+### libE57Format
+
+Esta aplicación depende de la biblioteca libE57Format para leer y escribir archivos en formato E57. Debes descargarla e instalarla manualmente:
+
+```bash
+# Clonar el repositorio de libE57Format (versión 3.2.0)
+git clone https://github.com/asmaloney/libE57Format.git
+cd libE57Format
+git checkout v3.2.0
+
+# Crear directorio de compilación
+mkdir -p build && cd build
+
+# Configurar y compilar
+cmake ..
+make
+sudo make install  # Opcional, para instalación global
+```
+
+Alternativamente, puedes colocar la biblioteca libE57Format en el directorio del proyecto:
+
+```bash
+# Desde el directorio raíz del proyecto
+git clone https://github.com/asmaloney/libE57Format.git
+git -C libE57Format checkout v3.2.0
+```
 
 ## Configuración de Desarrollo
 
@@ -19,7 +48,7 @@ Este proyecto utiliza un DevContainer para desarrollo. Para comenzar:
 
 ## Compilación del Proyecto
 
-Una vez dentro del DevContainer:
+### Linux/macOS
 
 ```bash
 mkdir -p build && cd build
@@ -27,7 +56,47 @@ cmake ..
 make
 ```
 
-El ejecutable se creará en el directorio `build/bin`.
+El ejecutable se creará en el directorio `build`.
+
+### Windows
+
+Hay dos formas de compilar para Windows:
+
+#### 1. Usando Visual Studio (Windows nativo)
+
+- Instalar [Visual Studio](https://visualstudio.microsoft.com/) con soporte para C++
+- Instalar [CMake](https://cmake.org/download/)
+- Clonar este repositorio y libE57Format
+- Generar los archivos de proyecto:
+  ```bash
+  mkdir build
+  cd build
+  cmake .. -G "Visual Studio 16 2019" -A x64
+  ```
+- Abrir el archivo `.sln` en Visual Studio y compilar
+
+#### 2. Compilación cruzada desde Linux usando MinGW
+
+Puedes compilar para Windows desde Linux utilizando el archivo de toolchain incluido:
+
+```bash
+# Instalar MinGW (necesario para compilación cruzada)
+sudo apt-get install mingw-w64
+
+# Configurar la compilación cruzada
+mkdir build-windows && cd build-windows
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../windows-toolchain.cmake
+make
+```
+
+Alternativamente, puedes usar Docker:
+
+```bash
+docker build -t e57splitter-windows -f Dockerfile.windows .
+docker create --name temp e57splitter-windows
+docker cp temp:/app/build-windows/e57splitter.exe .
+docker rm temp
+```
 
 ## Uso
 
@@ -44,12 +113,15 @@ La aplicación:
 
 Si encuentras errores relacionados con libE57Format:
 
-1. Asegúrate de que el submódulo libE57Format esté actualizado:
+1. Asegúrate de que la versión de libE57Format sea la 3.2.0:
    ```bash
-   git submodule update --init --recursive
+   cd libE57Format
+   git checkout v3.2.0
    ```
 
 2. La aplicación utiliza la API simplificada de libE57Format (E57SimpleReader, E57SimpleWriter) que es parte de la versión 3.2.0.
+
+3. Si el recuento de puntos en los escaneos muestra valores idénticos (como 42359888), esto podría indicar un problema con los metadatos del archivo E57. La aplicación intentará validar esto leyendo una muestra de puntos.
 
 ## Notas Técnicas
 
