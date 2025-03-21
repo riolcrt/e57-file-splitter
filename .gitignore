@@ -1,0 +1,32 @@
+# Archivos y directorios de compilación
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Directorios generados por CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Directorios y archivos de Visual Studio
+*.vcxproj
+*.vcxproj.filters
+*.sln
+.vs/
+x64/
+Debug/
+Release/
+
+# Archivos de respaldo del editor
+*~
+*.swp
+*.swo
+
+# Directorios de dependencias
+# No ignoramos libE57Format porque es un submódulo
+# libE57Format/

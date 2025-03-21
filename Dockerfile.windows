@@ -1,0 +1,23 @@
+FROM ubuntu:22.04
+
+# Instalar dependencias necesarias
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    mingw-w64 \
+    git \
+    libxerces-c-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copiar el código fuente
+COPY . .
+
+# Configurar la compilación cruzada
+RUN mkdir -p build-windows && cd build-windows && \
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=../windows-toolchain.cmake && \
+    make -j$(nproc)
+
+# El ejecutable estará en /app/build-windows/e57splitter.exe
