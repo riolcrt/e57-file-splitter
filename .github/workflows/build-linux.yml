@@ -1,0 +1,42 @@
+name: Build Linux
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential libxerces-c-dev
+
+    - name: Clone libE57Format
+      run: |
+        git clone https://github.com/asmaloney/libE57Format.git
+        cd libE57Format
+        git checkout v3.2.0
+
+    - name: Create build directory
+      run: mkdir -p build
+
+    - name: Configure CMake
+      run: cd build && cmake ..
+
+    - name: Build
+      run: cd build && make -j$(nproc)
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: e57splitter-linux
+        path: build/e57splitter

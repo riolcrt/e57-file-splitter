@@ -1,0 +1,58 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Clone libE57Format
+      shell: cmd
+      run: |
+        git clone https://github.com/asmaloney/libE57Format.git
+        cd libE57Format
+        git checkout v3.2.0
+
+    - name: Set up Visual Studio Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Install dependencies
+      shell: powershell
+      run: |
+        # Install Xerces-C++ using vcpkg
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        ./bootstrap-vcpkg.bat
+        ./vcpkg integrate install
+        ./vcpkg install xerces-c:x64-windows
+
+    - name: Create build directory
+      shell: cmd
+      run: mkdir build
+
+    - name: Configure CMake
+      shell: cmd
+      run: |
+        cd build
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+    - name: Build
+      shell: cmd
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: e57splitter-windows
+        path: build/Release/e57splitter.exe
